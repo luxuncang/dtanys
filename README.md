@@ -22,7 +22,7 @@ test = {
   'a':"这是一个测试的字典！",
   'b':['python','java','C','C++','go'],
   'c':[{'normal':1},{'abnormal':0},{'normal':1}],
-  'd':{'html':{'content'['css','js']}}
+  'd':{'html':{'content':['css','js']}}
 }
 ```
 
