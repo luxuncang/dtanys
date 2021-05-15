@@ -74,9 +74,10 @@ print(json.dumps(res, sort_keys=True, indent=4,ensure_ascii=False))
 print(XDict(res,'/result/tracks//name').edict())
 
 ```
-
+更多案例请参考[example]('example')文件
 
 ## 文档
+
 
 #### XDict语法
 
