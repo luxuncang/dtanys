@@ -1,21 +1,4 @@
-# datnys==1.0.4
-"""
-dtanys是一个python字典解析器
-~~~~~~~~~~~~~~~~~~~~~
-
-让人专注于非数据处理的代码构造中，dtanys使用xpath式语法
-usage:
-
-   >>> from dtanys import XDict
-   >>> r = {} or json
-   >>> XDict(r,'/result/tracks//["name","id"]').edict()
-   [[],...]
-
-其他使用说明请前往https://github.com/luxuncang/dtanys
-
-:copyright: (c) 2021 by ShengXin Lu.
-"""
-
+'''1.0.4 XDict解析器'''
 
 # 字典键值 泛解析
 def PanAnalysis(a,b,c=[]):
