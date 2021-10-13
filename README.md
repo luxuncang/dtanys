@@ -74,7 +74,7 @@ print(json.dumps(res, sort_keys=True, indent=4,ensure_ascii=False))
 print(XDict(res,'/result/tracks//name').edict())
 
 ```
-更多案例请参考[example](https://github.com/luxuncang/dtanys/tree/master/example)文件
+更多案例请参考[example](https://github.com/luxuncang/dtanys/tree/dtanys-1.0.5/example)文件
 
 ## 文档
 
@@ -87,10 +87,9 @@ print(XDict(res,'/result/tracks//name').edict())
 | // | 从匹配选择的当前节点选择字典中的节点，而不考虑它们的位置 |
 | [ any ] | 当any为带引号的键时，选取当前对象的键值；否则即为切片或索引 |
 | [ ,... ] | 要选择多个无规律的索引时，即可使用此方法，可重复选择 |
+| [@x=="Y" and @Z>=10] | 当需要筛选时可调用@表达式，支持多级逻辑表达式 and or || && |
 | * | 匹配任何元素节点 |
 | XX | 从当前节点的键值选取键值为"XX"的值 |
 | *XX | 从当前节点的键值选取所有键值为"XX"的值 |
 
 ---
-
-ps : 第一次写 github 项目，如有问题或建议请提Issues或Insight
