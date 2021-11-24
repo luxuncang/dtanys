@@ -1,4 +1,4 @@
-'''1.0.5解析器'''
+'''1.0.6解析器'''
 
 from collections.abc import Iterable
 import re
@@ -28,8 +28,6 @@ def DictAnalysis(data, key):
 def functools_reduce_iconcat(a):
     return functools.reduce(operator.iconcat, a, [])
 
-# dtanys 语法
-
 # 命令标识
 class jsonpath():
 
@@ -40,20 +38,22 @@ class jsonpath():
         xcode = jsonpath.exprparse(expr)
         step = 0
         steps = len(xcode)
-        print(xcode)
         return jsonpath.node(data, step, steps, xcode)
 
     @staticmethod
     def node(data, step, steps, xcode):
         if step >= steps:
-            if not isinstance(data, list):
+            if not isinstance(data, Iterable):
                 data = [data]
             return data
         if xcode[step] == '/':
             return jsonpath.node(data, step + 1, steps, xcode)
         elif xcode[step] == '//':
             if isinstance(data, list):
-                data = functools_reduce_iconcat([jsonpath.node(i, 0, 1, [xcode[step + 1]]) for i in data])
+                data = [list(i) for i in zip(*[jsonpath.node(i, 0, 1, [xcode[step + 1]]) for i in data])]
+                if len(data)==1:
+                    data = functools_reduce_iconcat(data)
+                # data = functools_reduce_iconcat([jsonpath.node(i, 0, 1, [xcode[step + 1]]) for i in data])
                 step += 1
             return jsonpath.node(data, step + 1, steps, xcode)
         elif xcode[step][0] == '*':
@@ -92,7 +92,8 @@ class jsonpath():
                 return jsonpath.node(data, step + 1, steps, xcode)
             elif ',' in xcode[step]:
                 zcode = jsonpath.manypares(xcode[step])
-                data = functools_reduce_iconcat([jsonpath.node(data, 0, 1, [str([i])]) for i in zcode])
+                data = [jsonpath.node(data, 0, 1, [str([i])]) for i in zcode]
+                # data = functools_reduce_iconcat([jsonpath.node(data, 0, 1, [str([i])]) for i in zcode])
                 return jsonpath.node(data, step + 1, steps, xcode)
             else:
                 return jsonpath.node(eval(f"data{xcode[step]}"), step + 1, steps, xcode)
@@ -101,7 +102,6 @@ class jsonpath():
                 return jsonpath.node(data[xcode[step]], step + 1, steps, xcode)
             else:
                 return jsonpath.node([], step + 1, steps, xcode)
-        
         
     # 节点码解析
     @staticmethod
