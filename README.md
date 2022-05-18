@@ -54,32 +54,63 @@ test = {
 #### example.py 模板
 
 ``` python
-## 获取一个网易云歌单json数据
-import json
-import requests
-from dtanys import XDict
-
-url = "http://music.163.com/api/playlist/detail?id=6806508584"
-
-headers = {
-    'User-Agent':"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11",
+from pprint import pprint
+from dtanys import jsonpath
+data = { 
+    "store": {
+    "book": [
+      { "category": "reference",
+        "author": "Nigel Rees",
+        "title": "Sayings of the Century",
+        "price": 8.95
+      },
+      { "category": "fiction",
+        "author": "Evelyn Waugh",
+        "title": "Sword of Honour",
+        "price": 2.99
+      },
+      { "category": "reference",
+        "author": "Herman Melville",
+        "title": "Moby Dick",
+        "isbn": "0-553-21311-3",
+        "price": 18.99
+      },
+      { "category": "fiction",
+        "author": "J. R. R. Tolkien",
+        "title": "The Lord of the Rings",
+        "isbn": "0-395-19395-8",
+        "price": 22.99
+      }
+    ],
+    "bicycle": {
+      "color": "red",
+      "price": 19.95
+    },
+    "test" : {
+        'dir': dir
     }
+    },
+    "test" : 'dsajk'
+}
 
-res = requests.get(url=url,headers=headers).json()
+# /a /*a //*a /*['a', 'b'] //*['a', 'b'] /a[1] /a[1:5:2] /a[1,2,3] //a[@b="s"] //[1] //['a', 'b']
 
-## 打印 json
-print(json.dumps(res, sort_keys=True, indent=4,ensure_ascii=False))
+# pprint(jsonpath.xpath(data, '/test'))
+# pprint(jsonpath.xpath(data, '/store/book[@price>10 | @category="fiction"]'))
+# pprint(jsonpath.xpath(data, '/store["test", "bicycle",]/*color'))
+# pprint(jsonpath.xpath(data, '/*[@price>10 and @category="fiction"]//price'))
+# pprint(jsonpath.xpath(data, '/store/book[@price>10 | @category="fiction"]//price'))
+# pprint(jsonpath.xpath(data, '//*["price","title"]'))
+# pprint(jsonpath.xpath(data, '/store/book[1,2]/*price'))
 
-## 获取 歌单所有歌名
-print(XDict(res,'/result/tracks//name').edict())
 
 ```
-更多案例请参考[example](https://github.com/luxuncang/dtanys/tree/master/example)文件
+更多案例请参考[example](https://github.com/luxuncang/dtanys/tree/dtanys-1.0.5/example)文件
 
 ## 文档
 
 
-#### XDict语法
+#### dtanys语法
 
 | 表达式 | 描述 |
 | :----: | :----- |
@@ -87,10 +118,9 @@ print(XDict(res,'/result/tracks//name').edict())
 | // | 从匹配选择的当前节点选择字典中的节点，而不考虑它们的位置 |
 | [ any ] | 当any为带引号的键时，选取当前对象的键值；否则即为切片或索引 |
 | [ ,... ] | 要选择多个无规律的索引时，即可使用此方法，可重复选择 |
+| [@x=="Y" and @Z>=10] | 当需要筛选时可调用@表达式，支持多级逻辑表达式 and or || && |
 | * | 匹配任何元素节点 |
 | XX | 从当前节点的键值选取键值为"XX"的值 |
 | *XX | 从当前节点的键值选取所有键值为"XX"的值 |
 
 ---
-
-ps : 第一次写 github 项目，如有问题或建议请提Issues或Insight
