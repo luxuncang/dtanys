@@ -15,9 +15,7 @@ def DictAnalysis(data, key):
                     area['area'].append(data)
                 for j in data.values():
                     RecursionAnalysis(j, key, area)
-            elif isinstance(data, str):
-                pass
-            else:
+            elif not isinstance(data, str):
                 for i in data:
                     RecursionAnalysis(i, key, area)
         return area
@@ -57,7 +55,7 @@ class jsonpath():
                 step += 1
             return jsonpath.node(data, step + 1, steps, xcode)
         elif xcode[step][0] == '*':
-            if xcode[step][0] == '*' and (step + 1)<len(xcode) and '@' in xcode[step + 1]:
+            if (step + 1) < len(xcode) and '@' in xcode[step + 1]:
                 zcode = jsonpath.ifparse(xcode[step + 1])
                 zdata = []
                 ifdata = []
@@ -76,11 +74,11 @@ class jsonpath():
                 data = DictAnalysis(data, xcode[step][1:])['value']
                 return jsonpath.node(data, step + 1, steps, xcode)
         elif xcode[step][0] == '[':
-            if xcode[step][0:2] == '[@':
+            if xcode[step][:2] == '[@':
                 zcode = jsonpath.ifparse(xcode[step])
                 zdata = []                   # 条件data容器
                 ifdata = []                  # and or
-                for i,j in enumerate(zcode):
+                for j in zcode:
                     if isinstance(j, list):
                         zdata.append([])
                         for z,k in enumerate(data):
@@ -97,11 +95,10 @@ class jsonpath():
                 return jsonpath.node(data, step + 1, steps, xcode)
             else:
                 return jsonpath.node(eval(f"data{xcode[step]}"), step + 1, steps, xcode)
+        elif xcode[step] in data:
+            return jsonpath.node(data[xcode[step]], step + 1, steps, xcode)
         else:
-            if xcode[step] in data:
-                return jsonpath.node(data[xcode[step]], step + 1, steps, xcode)
-            else:
-                return jsonpath.node([], step + 1, steps, xcode)
+            return jsonpath.node([], step + 1, steps, xcode)
         
     # 节点码解析
     @staticmethod
@@ -119,18 +116,14 @@ class jsonpath():
     # *泛解析
     @staticmethod
     def panparse(expr):
-        res = re.split('(\*{1})', expr)[1:]
-        if res:
-            return res
-        return expr
+        return res if (res := re.split('(\*{1})', expr)[1:]) else expr
 
     # ,解析
     @staticmethod
     def manypares(expr):
         pattern = re.compile('\[(.+)\]')
         try:
-            res = eval(pattern.search(expr).group(0))
-            return res
+            return eval(pattern.search(expr)[0])
         except SyntaxError:
             raise SyntaxError("Can't use the sample with ','")
 
@@ -138,8 +131,7 @@ class jsonpath():
     @staticmethod
     def indexparse(expr):
         pattern = re.compile('(.+)(\[.+\])')
-        res = pattern.search(expr)
-        if res:
+        if res := pattern.search(expr):
             return res.groups()
         return expr
 
@@ -160,42 +152,32 @@ class jsonpath():
     # 交并补处理
     @staticmethod
     def setput(datas ,zdata, ifdata):
-        if ifdata:
-            for i,j in enumerate(zdata):
-                if i >= 1:
-                    if ifdata[i-1] == 'and':
-                        data = set(j) & data
-                    elif ifdata[i-1] == '&':
-                        data = set(j) & data
-                    elif ifdata[i-1] == 'or':
-                        data = set(j) | data
-                    elif ifdata[i-1] == '|':
-                        data = set(j) | data
-                else:
-                    data = set(j)
-            return [datas[i] for i in data]
-        else:
+        if not ifdata:
             return [datas[i] for i in zdata[0]]
+        for i,j in enumerate(zdata):
+            if i >= 1:
+                if ifdata[i - 1] in ['and', '&']:
+                    data = set(j) & data
+                elif ifdata[i - 1] in ['or', '|']:
+                    data = set(j) | data
+            else:
+                data = set(j)
+        return [datas[i] for i in data]
 
     # *[@ ]
     @staticmethod
     def ifsetput(datas ,zdata, ifdata):
-        if ifdata:
-            for i,j in enumerate(zdata):
-                if i >=1:
-                    if ifdata[i-1] == 'and':
-                        data = [k for k in j if k in data]
-                    elif ifdata[i-1] == '&':
-                        data = [k for k in j if k in data]
-                    elif ifdata[i-1] == 'or':
-                        data += [k for k in j if not k in data]
-                    elif ifdata[i-1] == '|':
-                        data += [k for k in j if not k in data]
-                else:
-                    data = j
-            return data
-        else:
+        if not ifdata:
             return functools_reduce_iconcat(datas)
+        for i,j in enumerate(zdata):
+            if i >=1:
+                if ifdata[i - 1] in ['and', '&']:
+                    data = [k for k in j if k in data]
+                elif ifdata[i - 1] in ['or', '|']:
+                    data += [k for k in j if k not in data]
+            else:
+                data = j
+        return data
 
     # 逻辑处理
     @staticmethod
@@ -217,16 +199,14 @@ class jsonpath():
     @staticmethod
     def nodeput(data, step, steps, xcode):
         zcode = jsonpath.ifparse(xcode[step])
-        zdata = []                   # 条件data容器
-        ifdata = []                  # and or
-        for i,j in enumerate(zcode):
+        zdata = []
+        for j in zcode:
             if isinstance(j, list):
                 zdata.append([])
                 for z,k in enumerate(data):
                     if jsonpath.boolput(k, j):
                         zdata[-1].append(z)
-        else:
-            ifdata.append(j)
+        ifdata = [j]
         data = jsonpath.setput(data , zdata, ifdata)
         return data
 
