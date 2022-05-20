@@ -30,7 +30,7 @@ def XDictAnalysis(ps):
     ps = ps.split('/')[1:]
     for i,j in enumerate(ps):
         if j=='':
-            ps[i+1] = '/' + ps[i+1]
+            ps[i+1] = f'/{ps[i+1]}'
         else:
             arr.append(j)
     ass = []
@@ -38,13 +38,12 @@ def XDictAnalysis(ps):
         lines = i.replace(']','').split('[')
         for z,j in enumerate(lines):
             if '/' in lines[0]:
-                if not z==0:
+                if z != 0:
                     ass.append('/' + '[' + j + ']')
-                else:
-                    if not j=='/':
-                        ass.append(j)
+                elif j != '/':
+                    ass.append(j)
             elif len(lines)>=2 and z>0:
-                ass.append('[' + j + ']')
+                ass.append(f'[{j}]')
             else:
                 ass.append(j)
 
@@ -75,7 +74,7 @@ class XDict():
         self.step = 0                           # 解析度
         self.steps = len(self.xcode)            # 解析位
     
-    def edict(self)->list:
+    def edict(self) -> list:
         if self.step>=self.steps:
             if not isinstance(self.dicts,list):
                 self.dicts = [self.dicts]
@@ -85,7 +84,7 @@ class XDict():
         elif self.xcode[self.step][0]=='[':
             if ',' in self.xcode[self.step]:
                 e = self.xcode[self.step].replace('[', '').replace(']', '').split(',')
-                res = [eval(f"{self.dicts}[{z}]") for z in e if not ':' in z]
+                res = [eval(f"{self.dicts}[{z}]") for z in e if ':' not in z]
                 for i in e:
                     if ':' in i:
                         res += eval(f"{self.dicts}[{i}]")
@@ -97,7 +96,7 @@ class XDict():
                 if self.xcode[self.step][1]=='[':
                     if ',' in self.xcode[self.step]:
                         e = self.xcode[self.step][1:].replace('[', '').replace(']', '').split(',')
-                        res = [[eval(f"{i}[{z}]") for z in e if not ':' in z] for i in self.dicts]
+                        res = [[eval(f"{i}[{z}]") for z in e if ':' not in z] for i in self.dicts]
                         for i in e:
                             if ':' in i:
                                 for z in self.dicts:
@@ -115,7 +114,7 @@ class XDict():
                 return self.edict()
         else:
             if isinstance(self.dicts,list):
-                self.xcode[self.step] = '/' + self.xcode[self.step]
+                self.xcode[self.step] = f'/{self.xcode[self.step]}'
                 return self.edict()
             self.dicts = self.dicts[self.xcode[self.step]]
         self.step+=1
